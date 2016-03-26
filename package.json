@@ -1,0 +1,31 @@
+{
+  "name": "desdrive",
+  "description": "Directory analyzer, designed to gut the S-Drive.",
+  "version": "0.1.0",
+  "license": "MIT",
+  "author": "James Montalvo",
+  "contributors": [],
+  "homepage": "https://github.com/jamesmontalvo3/desdrive",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/jamesmontalvo3/desdrive"
+  },
+  "dependencies": {
+    "mysql": ">2.10.1"
+  },
+  "devDependencies": {},
+  "files": [
+    "run.js"
+  ],
+  "engines": {
+    "node": ">= 0.10"
+  },
+  "scripts": {},
+  "bugs": {
+    "url": "https://github.com/jamesmontalvo3/desdrive/issues"
+  },
+  "main": "run.js",
+  "keywords": [
+    "none"
+  ]
+}
