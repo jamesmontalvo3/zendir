@@ -38,22 +38,20 @@ File
 
 var scanDir = function ( dirpath ) {
 
-	fs.readdir( dirpath, function(err, files){
+	var files = fs.readdirSync( dirpath );
 
-		for( var i=0; i<files.length; i++) {
+	for( var i=0; i<files.length; i++) {
 
-			filepath = path.join( dirpath, files[i] );
-			var isFile = fs.lstatSync(filepath).isFile();
+		filepath = path.join( dirpath, files[i] );
+		var isFile = fs.lstatSync(filepath).isFile();
 
-			if ( isFile ) {
-				hashFile( filepath );
-			}
-			else {
-				scanDir( filepath );
-			}
+		if ( isFile ) {
+			hashFile( filepath );
 		}
-
-	} );
+		else {
+			scanDir( filepath );
+		}
+	}
 
 	console.log( "SCANNING " + dirpath );
 };
@@ -67,11 +65,11 @@ var hashFile = function ( filepath ) {
 
 	stream.on('data', function (data) {
 	    hash.update(data, 'utf8')
-	})
+	});
 
 	stream.on('end', function () {
 	    recordInDatabase( filepath, hash.digest('hex') );
-	})
+	});
 
 };
 
