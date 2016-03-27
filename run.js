@@ -63,6 +63,8 @@ var scanDir = function ( dirpath ) {
 
 var hashFile = function ( filepath ) {
 
+	console.log( "RECORDING " + filepath );
+
 	var crypto = require('crypto'),
 		hash = crypto.createHash('sha1'),
 	    stream = fs.createReadStream(filepath);
