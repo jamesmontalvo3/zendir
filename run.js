@@ -36,6 +36,8 @@ File
 
 */
 
+var filepaths = [];
+
 var scanDir = function ( dirpath ) {
 
 	var files = fs.readdirSync( dirpath );
@@ -46,7 +48,7 @@ var scanDir = function ( dirpath ) {
 		var isFile = fs.lstatSync(filepath).isFile();
 
 		if ( isFile ) {
-			hashFile( filepath );
+			filepaths.push( filepath );
 		}
 		else {
 			scanDir( filepath );
@@ -55,6 +57,8 @@ var scanDir = function ( dirpath ) {
 
 	console.log( "SCANNING " + dirpath );
 };
+
+
 
 
 var hashFile = function ( filepath ) {
@@ -90,11 +94,21 @@ var recordInDatabase = function ( filepath, sha1 ) {
 		if (err) throw err;
 	});
 
+	nextFile++;
+	if ( filepaths[nextFile] ) {
+		hashFile(filepaths[nextFile]);
+	}
+	else {
+		console.log( "scan complete" );
+		process.exit();
+	}
 };
 
 
 // first real argument must be a valid path
 var pathToScan = process.argv[2];
+var nextFile = 0;
 if ( fs.lstatSync( pathToScan ).isDirectory() ) {
 	scanDir( pathToScan );
+	hashFile( filepaths[nextFile] );
 }
