@@ -116,6 +116,9 @@ var phashFile = function(filepath, sha1, bits, mode) {
 		            next(imgData);
 		        });
 		    };
+		default:
+			recordInDatabase( filepath, sha1, '' );
+			return;
 	}
 
 	getImgData(function(imgData) {
