@@ -11,7 +11,10 @@
     "url": "https://github.com/jamesmontalvo3/desdrive"
   },
   "dependencies": {
-    "mysql": ">2.10.1"
+    "mysql": ">2.10.1",
+    "blockhash-js": "*",
+    "jpeg-js": "*",
+    "png-js": "*"
   },
   "devDependencies": {},
   "files": [
