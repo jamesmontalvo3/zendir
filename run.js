@@ -63,7 +63,9 @@ var scanDir = function ( dirpath ) {
 
 var hashFile = function ( filepath ) {
 
-	console.log( "RECORDING " + filepath );
+	var percentComplete = Math.round((nextFile / filepaths.length) * 100);
+
+	console.log( "RECORDING (" + percentComplete + "): " + filepath );
 
 	var crypto = require('crypto'),
 		hash = crypto.createHash('sha1'),
@@ -74,13 +76,61 @@ var hashFile = function ( filepath ) {
 	});
 
 	stream.on('end', function () {
-	    recordInDatabase( filepath, hash.digest('hex') );
+	    phashFile( filepath, hash.digest('hex') );
+	});
+
+};
+
+// FIXME: quick hack together...sha1 shouldn't be passed to this
+var phashFile = function(filepath, sha1, bits, mode) {
+
+	if ( ! bits ) { bits = 16; }
+	if ( ! mode ) { mode = 2; } // higher quality has (for faster, do 1)
+
+	var data,
+		getImgData,
+		hash,
+		ext;
+
+	data = new Uint8Array(fs.readFileSync(filepath));
+	ext = path.extname(filepath);
+
+	switch (ext) {
+		case '.jpg':
+		    getImgData = function(next) {
+		        next(jpeg.decode(data));
+		    };
+		    break;
+
+		case '.png':
+		    getImgData = function(next) {
+		        var png = new PNG(data);
+		        var imgData = {
+		            width: png.width,
+		            height: png.height,
+		            data: new Uint8Array(png.width * png.height * 4)
+		        };
+
+		        png.decodePixels(function(pixels) {
+		            png.copyToImageData(imgData, pixels);
+		            next(imgData);
+		        });
+		    };
+	}
+
+	getImgData(function(imgData) {
+	    phash = blockhash.blockhashData(imgData, bits, mode);
+
+	    // use hamming distance to iron out little
+	    // differences between this jpeg decoder and the one in PIL
+	    // var hd = blockhash.hammingDistance(expectedHash, hash);
+	    recordInDatabase( filepath, sha1, phash );
 	});
 
 };
 
 
-var recordInDatabase = function ( filepath, sha1 ) {
+var recordInDatabase = function ( filepath, sha1, phash ) {
 
 	var fileInfo = path.parse( filepath );
 
@@ -89,7 +139,8 @@ var recordInDatabase = function ( filepath, sha1 ) {
 		filename: fileInfo.base,
 		ext: fileInfo.ext.replace(/^\./, '').toLowerCase(), // trim leading period off extension
 		bytes: fs.statSync( filepath ).size,
-		sha1: sha1
+		sha1: sha1,
+		phash: phash
 	};
 
 	var query = connection.query('INSERT INTO files SET ?', file, function(err, result) {
