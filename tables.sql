@@ -28,4 +28,4 @@ CREATE TABLE files (
 CREATE UNIQUE INDEX filepath ON files (filepath);
 CREATE INDEX extension ON files (ext);
 CREATE INDEX sha1 ON files (sha1);
-CREATE INDEX phash ON files (phash);
+CREATE INDEX blockhash ON files (blockhash);
