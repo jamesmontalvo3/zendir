@@ -1,6 +1,6 @@
 var fs = require('fs');
 var path = require('path');
-var mysql      = require('mysql');
+var mysql = require('mysql');
 
 // for blockhash
 var blockhash = require('blockhash');
@@ -16,22 +16,28 @@ var filepaths = [];
 
 var scanDir = function ( dirpath ) {
 
-	var files = fs.readdirSync( dirpath );
+	try {
+		var files = fs.readdirSync( dirpath );
 
-	for( var i=0; i<files.length; i++) {
+		for( var i=0; i<files.length; i++) {
 
-		filepath = path.join( dirpath, files[i] );
-		var isFile = fs.lstatSync(filepath).isFile();
+			filepath = path.join( dirpath, files[i] );
+			var isFile = fs.lstatSync(filepath).isFile();
 
-		if ( isFile ) {
-			filepaths.push( filepath );
+			if ( isFile ) {
+				filepaths.push( filepath );
+			}
+			else {
+				scanDir( filepath );
+			}
 		}
-		else {
-			scanDir( filepath );
-		}
-	}
 
-	console.log( "SCANNING " + dirpath );
+		console.log( "SCANNING " + dirpath );
+
+    } catch (err) {
+    	console.log( "SKIPPING " + dirpath + ": " + err );
+    }
+
 };
 
 
