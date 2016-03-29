@@ -110,10 +110,16 @@ var recordInDatabase = function ( filepath, sha1, blockhash ) {
 
 	var fileInfo = path.parse( filepath );
 
+	// trim leading period off extension, lowercase, normalize name
+	var ext = fileInfo.ext.replace(/^\./, '').toLowerCase();
+	if ( ext === "jpg" ) {
+		ext = "jpeg";
+	}
+
 	var file  = {
 		filepath: filepath,
 		filename: fileInfo.base,
-		ext: fileInfo.ext.replace(/^\./, '').toLowerCase(), // trim leading period off extension
+		ext: ext,
 		bytes: fs.statSync( filepath ).size,
 		sha1: sha1,
 		blockhash: blockhashFile( filepath )
