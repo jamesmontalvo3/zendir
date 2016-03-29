@@ -22,7 +22,7 @@ CREATE TABLE files (
   ext varchar(10) binary NOT NULL default '',
   bytes bigint NOT NULL default 0,
   sha1 varbinary(40) NOT NULL default '',
-  phash varbinary(64) NOT NULL default ''
+  blockhash varbinary(64) NOT NULL default ''
 );
 
 CREATE UNIQUE INDEX filepath ON files (filepath);

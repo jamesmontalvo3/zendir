@@ -41,7 +41,7 @@ var hashFile = function ( filepath ) {
 
 	var percentComplete = ((nextFile / filepaths.length) * 100).toFixed(2);
 
-	console.log( "RECORDING (" + percentComplete + "%): " + filepath );
+	console.log( "(" + percentComplete + "%) RECORDING: " + filepath );
 
 	var crypto = require('crypto'),
 		hash = crypto.createHash('sha1'),
@@ -57,7 +57,7 @@ var hashFile = function ( filepath ) {
 
 };
 
-var phashFile = function( filepath, bits, mode ) {
+var blockhashFile = function( filepath, bits, mode ) {
 
 	if ( ! bits ) { bits = 16; }
 	if ( ! mode ) { mode = 2; } // higher quality has (for faster, do 1)
@@ -72,21 +72,22 @@ var phashFile = function( filepath, bits, mode ) {
 
     try {
         if (ext === '.png') {
-            png = new PNG(data);
+        	return ""; // png is failing. Skip for now. JPEG is what we mostly care about
+            // png = new PNG(data);
 
-            imgData = {
-                width: png.width,
-                height: png.height,
-                data: new Uint8Array(png.width * png.height * 4)
-            };
+            // imgData = {
+            //     width: png.width,
+            //     height: png.height,
+            //     data: new Uint8Array(png.width * png.height * 4)
+            // };
 
-            png.copyToImageData(imgData, png.decodePixels());
+            // png.copyToImageData(imgData, png.decodePixels(function(){}));
         }
         else if (ext === '.jpeg' || ext === '.jpg') {
             imgData = jpeg.decode(data);
         }
         else {
-        	return ""; // not a png or jpeg, no phash
+        	return ""; // not a png or jpeg, no blockhash
         }
 
         if (!imgData) {
@@ -95,16 +96,17 @@ var phashFile = function( filepath, bits, mode ) {
 
         // TODO: resize if required
 
-        return blockhash.blockhashData(imgData, bits, method);
+        return blockhash.blockhashData(imgData, bits, mode);
 
     } catch (err) {
+    	console.log( err );
     	return "catchable error";
     }
 
 };
 
 
-var recordInDatabase = function ( filepath, sha1, phash ) {
+var recordInDatabase = function ( filepath, sha1, blockhash ) {
 
 	var fileInfo = path.parse( filepath );
 
@@ -114,7 +116,7 @@ var recordInDatabase = function ( filepath, sha1, phash ) {
 		ext: fileInfo.ext.replace(/^\./, '').toLowerCase(), // trim leading period off extension
 		bytes: fs.statSync( filepath ).size,
 		sha1: sha1,
-		phash: phashFile( filepath )
+		blockhash: blockhashFile( filepath )
 	};
 
 	var query = connection.query('INSERT INTO files SET ?', file, function(err, result) {
