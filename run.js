@@ -10,37 +10,7 @@ var jpeg = require('jpeg-js');
 var conf = JSON.parse( fs.readFileSync("config.json") );
 var connection = mysql.createConnection(conf);
 connection.connect();
-// connection.end();
 
-
-/*
-
-File
-	path
-	filename
-	extension
-	size (bytes)
-	sha1
-
-	// later
-	phash
-
-	// even later
-	created
-	modified
-	accessed
-
-	// even even later
-	parent directory bytes
-	parent directory files
-	grandparent dir bytes
-	grandparent dir files
-
-	// probably never
-	parent dir like-file bytes
-	parent dir like-file files
-
-*/
 
 var filepaths = [];
 
@@ -82,13 +52,12 @@ var hashFile = function ( filepath ) {
 	});
 
 	stream.on('end', function () {
-	    phashFile( filepath, hash.digest('hex') );
+	    recordInDatabase( filepath, hash.digest('hex') );
 	});
 
 };
 
-// FIXME: quick hack together...sha1 shouldn't be passed to this
-var phashFile = function(filepath, sha1, bits, mode) {
+var phashFile = function( filepath, bits, mode ) {
 
 	if ( ! bits ) { bits = 16; }
 	if ( ! mode ) { mode = 2; } // higher quality has (for faster, do 1)
@@ -99,42 +68,38 @@ var phashFile = function(filepath, sha1, bits, mode) {
 		ext;
 
 	data = new Uint8Array(fs.readFileSync(filepath));
-	ext = path.extname(filepath);
+	ext = path.extname(filepath).toLowerCase();
 
-	switch (ext) {
-		case '.jpg':
-		    getImgData = function(next) {
-		        next(jpeg.decode(data));
-		    };
-		    break;
+    try {
+        if (ext === '.png') {
+            png = new PNG(data);
 
-		case '.png':
-		    getImgData = function(next) {
-		        var png = new PNG(data);
-		        var imgData = {
-		            width: png.width,
-		            height: png.height,
-		            data: new Uint8Array(png.width * png.height * 4)
-		        };
+            imgData = {
+                width: png.width,
+                height: png.height,
+                data: new Uint8Array(png.width * png.height * 4)
+            };
 
-		        png.decodePixels(function(pixels) {
-		            png.copyToImageData(imgData, pixels);
-		            next(imgData);
-		        });
-		    };
-		default:
-			recordInDatabase( filepath, sha1, '' );
-			return;
-	}
+            png.copyToImageData(imgData, png.decodePixels());
+        }
+        else if (ext === '.jpeg' || ext === '.jpg') {
+            imgData = jpeg.decode(data);
+        }
+        else {
+        	return ""; // not a png or jpeg, no phash
+        }
 
-	getImgData(function(imgData) {
-	    phash = blockhash.blockhashData(imgData, bits, mode);
+        if (!imgData) {
+            return "Couldn't decode image";
+        }
 
-	    // use hamming distance to iron out little
-	    // differences between this jpeg decoder and the one in PIL
-	    // var hd = blockhash.hammingDistance(expectedHash, hash);
-	    recordInDatabase( filepath, sha1, phash );
-	});
+        // TODO: resize if required
+
+        return blockhash.blockhashData(imgData, bits, method);
+
+    } catch (err) {
+    	return "catchable error";
+    }
 
 };
 
@@ -149,7 +114,7 @@ var recordInDatabase = function ( filepath, sha1, phash ) {
 		ext: fileInfo.ext.replace(/^\./, '').toLowerCase(), // trim leading period off extension
 		bytes: fs.statSync( filepath ).size,
 		sha1: sha1,
-		phash: phash
+		phash: phashFile( filepath )
 	};
 
 	var query = connection.query('INSERT INTO files SET ?', file, function(err, result) {

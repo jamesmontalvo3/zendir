@@ -1,6 +1,21 @@
 --
 -- files table
 --
+-- add later
+--   created
+--   modified
+--   accessed
+--
+-- add even later
+--   parent directory bytes
+--   parent directory files
+--   grandparent dir bytes
+--   grandparent dir files
+--
+-- probably never
+--   parent dir like-file bytes
+--   parent dir like-file files
+--
 CREATE TABLE files (
   filepath varchar(255) binary NOT NULL default '',
   filename varchar(255) binary NOT NULL default '',
