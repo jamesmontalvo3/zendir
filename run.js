@@ -69,9 +69,9 @@ var scanDir = function ( dirpath ) {
 
 var hashFile = function ( filepath ) {
 
-	var percentComplete = Math.round((nextFile / filepaths.length) * 100);
+	var percentComplete = ((nextFile / filepaths.length) * 100).toFixed(2);
 
-	console.log( "RECORDING (" + percentComplete + "): " + filepath );
+	console.log( "RECORDING (" + percentComplete + "%): " + filepath );
 
 	var crypto = require('crypto'),
 		hash = crypto.createHash('sha1'),
