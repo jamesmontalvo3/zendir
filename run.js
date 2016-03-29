@@ -1,6 +1,12 @@
 var fs = require('fs');
 var path = require('path');
 var mysql      = require('mysql');
+
+// for blockhash
+var blockhash = require('blockhash');
+var PNG = require('png-js');
+var jpeg = require('jpeg-js');
+
 var conf = JSON.parse( fs.readFileSync("config.json") );
 var connection = mysql.createConnection(conf);
 connection.connect();
