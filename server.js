@@ -92,7 +92,7 @@ http.createServer(function(request, response) {
 					}
 
 					identicals[rowUnique].files.push(fileInfo);
-					totalBytes[rowUnique].bytes += row.bytes;
+					identicals[rowUnique].bytes += row.bytes;
 
 				}
 
