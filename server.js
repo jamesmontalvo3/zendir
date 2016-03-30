@@ -38,16 +38,19 @@ http.createServer(function(request, response) {
 			// };
 
 
-			if ( request.url === "" ) {
+			var urlParts = request.url.replace(/^\//, '').replace(/\/$/, '').split("/");
+
+
+			if ( urlParts[0] === "" ) {
 				response.write( "<h1></h1><ul><li><a href='sha1'>sha1</a></li><li><a href='blockhash'>blockhash</a></li></ul>" );
 				response.end();
 				return;
 			}
-			else if ( request.url === "/sha1" ) {
+			else if ( urlParts[0] === "sha1" ) {
 				queryFile = "selectDuplicateSha1.sql";
 				uniqueCol = "sha1";
 			}
-			else if ( request.url === "/blockhash" ) {
+			else if ( urlParts[0] === "blockhash" ) {
 				queryFile = "selectDuplicateBlockhash.sql";
 				uniqueCol = "blockhash";
 			}
@@ -92,7 +95,7 @@ http.createServer(function(request, response) {
 					}
 
 					identicals[rowUnique].files.push(fileInfo);
-					identicals[rowUnique].bytes += row.bytes;
+					identicals[rowUnique].totalBytes += row.bytes;
 
 				}
 
@@ -100,11 +103,29 @@ http.createServer(function(request, response) {
 				for( var u in identicals ) {
 					sorted.push( identicals[u] );
 				}
-				sorted.sort(function(a,b) {return (a.bytes > b.bytes) ? 1 : ((b.bytes > a.bytes) ? -1 : 0);} );
 
-				response.write( JSON.stringify( sorted ) );
-				response.end();
+				if ( urlParts[1] === "json" ) {
+					sorted.sort(function(a,b) {return (a.totalBytes > b.totalBytes) ? 1 : ((b.totalBytes > a.totalBytes) ? -1 : 0);} );
 
+					response.write( JSON.stringify( sorted ) );
+					response.end();
+				}
+				else {
+					var html = "<ul>";
+					for( var i=0; i<10; i++ ) {
+						html += "<li>" + sorted[i].files[0][uniqueCol] + "<ul>";
+						for ( var j=0; j<sorted[i].files.length; j++ ) {
+							var relPath = sorted[i].files[j].relativepath;
+							html += "<li><a href='" + conf.uriPrefix + relPath + "'>" + relPath + "</a></li>";
+						}
+						html += "</ul>";
+
+					}
+					html += "</ul>";
+
+					response.write( html );
+					response.end();
+				}
 			});
 		});
 }).listen(8080); // Activates this server, listening on port 8080.
