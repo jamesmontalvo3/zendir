@@ -8,8 +8,6 @@ var PNG = require('png-js');
 var jpeg = require('jpeg-js');
 
 var conf = JSON.parse( fs.readFileSync("config.json") );
-var connection = mysql.createConnection(conf);
-connection.connect();
 
 var errors = [];
 var filepaths = [];
@@ -137,14 +135,17 @@ var recordInDatabase = function ( filepath, sha1, blockhash ) {
 		sha1: sha1,
 		blockhash: blockhashFile( filepath )
 	};
-
+	
+	var connection = mysql.createConnection(conf);
+	connection.connect();
 	var query = connection.query('INSERT INTO files SET ?', file, function(err, result) {
 		if (err) {
 			console.log( err );
 			errors.push( err );
 		}
 	});
-
+	connection.end();
+	
 	nextFile++;
 	if ( filepaths[nextFile] ) {
 		hashFile(filepaths[nextFile]);
