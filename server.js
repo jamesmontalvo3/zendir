@@ -106,7 +106,7 @@ http.createServer(function(request, response) {
 				if ( urlParts[1] === "json" ) {
 					sorted.sort(function(a,b) {return (a.totalBytes > b.totalBytes) ? -1 : ((b.totalBytes > a.totalBytes) ? 1 : 0);} );
 
-				    response.writeHead(200, {'Content-Type': 'application/json'})
+					response.writeHead(200, {'Content-Type': 'application/json'})
 					response.write( JSON.stringify( sorted ) );
 					response.end();
 				}
@@ -123,7 +123,7 @@ http.createServer(function(request, response) {
 					}
 					html += "</ul>";
 
-				    response.writeHead(200, {'Content-Type': 'text/html'})
+					response.writeHead(200, {'Content-Type': 'text/html'})
 					response.write( html );
 					response.end();
 				}

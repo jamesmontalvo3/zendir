@@ -32,9 +32,9 @@ var scanDir = function ( dirpath ) {
 
 		console.log( "SCANNING " + dirpath );
 
-    } catch (err) {
-    	console.log( "SKIPPING " + dirpath + ": " + err );
-    }
+	} catch (err) {
+		console.log( "SKIPPING " + dirpath + ": " + err );
+	}
 
 };
 
@@ -49,10 +49,10 @@ var hashFile = function ( filepath ) {
 
 	var crypto = require('crypto'),
 		hash = crypto.createHash('sha1'),
-	    stream = fs.createReadStream(filepath);
+		stream = fs.createReadStream(filepath);
 
 	stream.on('data', function (data) {
-	    hash.update(data, 'utf8')
+		hash.update(data, 'utf8')
 	});
 
 	stream.on('error', function (err) {
@@ -60,7 +60,7 @@ var hashFile = function ( filepath ) {
 	});
 
 	stream.on('end', function () {
-	    recordInDatabase( filepath, hash.digest('hex') );
+		recordInDatabase( filepath, hash.digest('hex') );
 	});
 
 };
@@ -78,38 +78,38 @@ var blockhashFile = function( filepath, bits, mode ) {
 	data = new Uint8Array(fs.readFileSync(filepath));
 	ext = path.extname(filepath).toLowerCase();
 
-    try {
-        if (ext === '.png') {
-        	return ""; // png is failing. Skip for now. JPEG is what we mostly care about
-            // png = new PNG(data);
+	try {
+		if (ext === '.png') {
+			return ""; // png is failing. Skip for now. JPEG is what we mostly care about
+			// png = new PNG(data);
 
-            // imgData = {
-            //     width: png.width,
-            //     height: png.height,
-            //     data: new Uint8Array(png.width * png.height * 4)
-            // };
+			// imgData = {
+			//	 width: png.width,
+			//	 height: png.height,
+			//	 data: new Uint8Array(png.width * png.height * 4)
+			// };
 
-            // png.copyToImageData(imgData, png.decodePixels(function(){}));
-        }
-        else if (ext === '.jpeg' || ext === '.jpg') {
-            imgData = jpeg.decode(data);
-        }
-        else {
-        	return ""; // not a png or jpeg, no blockhash
-        }
+			// png.copyToImageData(imgData, png.decodePixels(function(){}));
+		}
+		else if (ext === '.jpeg' || ext === '.jpg') {
+			imgData = jpeg.decode(data);
+		}
+		else {
+			return ""; // not a png or jpeg, no blockhash
+		}
 
-        if (!imgData) {
-            return "Couldn't decode image";
-        }
+		if (!imgData) {
+			return "Couldn't decode image";
+		}
 
-        // TODO: resize if required
+		// TODO: resize if required
 
-        return blockhash.blockhashData(imgData, bits, mode);
+		return blockhash.blockhashData(imgData, bits, mode);
 
-    } catch (err) {
-    	console.log( err );
-    	return "catchable error";
-    }
+	} catch (err) {
+		console.log( err );
+		return "catchable error";
+	}
 
 };
 
@@ -135,7 +135,7 @@ var recordInDatabase = function ( filepath, sha1, blockhash ) {
 		sha1: sha1,
 		blockhash: blockhashFile( filepath )
 	};
-	
+
 	var connection = mysql.createConnection(conf);
 	connection.connect();
 	var query = connection.query('INSERT INTO files SET ?', file, function(err, result) {
@@ -145,7 +145,7 @@ var recordInDatabase = function ( filepath, sha1, blockhash ) {
 		}
 	});
 	connection.end();
-	
+
 	nextFile++;
 	if ( filepaths[nextFile] ) {
 		hashFile(filepaths[nextFile]);
