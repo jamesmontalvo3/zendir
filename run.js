@@ -130,7 +130,7 @@ var recordInDatabase = function ( filepath, sha1, blockhash ) {
 
 	var file  = {
 		rootpath: rootpath,
-		relativepath: filepath,
+		relativepath: relativepath,
 		filename: fileInfo.base,
 		ext: ext,
 		bytes: fs.statSync( filepath ).size,
