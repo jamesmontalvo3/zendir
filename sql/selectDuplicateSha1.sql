@@ -13,6 +13,7 @@ RIGHT JOIN (
 	WHERE
 		sha1 != ""
 		AND sha1 IS NOT NULL
+		AND bytes != 0
 	GROUP BY sha1
 	HAVING num_duplicates > 1
 ) AS tmp ON tmp.sha1 = files.sha1

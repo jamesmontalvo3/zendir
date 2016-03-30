@@ -14,6 +14,7 @@ RIGHT JOIN (
 		blockhash != ""
 		AND blockhash != "catchable error"
 		AND blockhash IS NOT NULL
+		AND bytes != 0
 	GROUP BY blockhash
 	HAVING num_duplicates > 1
 ) AS tmp ON tmp.blockhash = files.blockhash
