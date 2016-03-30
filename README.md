@@ -8,6 +8,8 @@ Install
 git clone https://github.com/jamesmontalvo3/desdrive
 cd desdrive
 npm install
+cp config.example.json config.json
+vi config.json # edit this accordingly
 node setup.js
 ```
 
