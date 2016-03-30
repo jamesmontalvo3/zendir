@@ -43,11 +43,11 @@ http.createServer(function(request, response) {
 				response.end();
 				return;
 			}
-			else if ( request.url === "sha1" ) {
+			else if ( request.url === "/sha1" ) {
 				queryFile = "selectDuplicateSha1.sql";
 				uniqueCol = "sha1";
 			}
-			else if ( request.url === "blockhash" ) {
+			else if ( request.url === "/blockhash" ) {
 				queryFile = "selectDuplicateBlockhash.sql";
 				uniqueCol = "blockhash";
 			}
