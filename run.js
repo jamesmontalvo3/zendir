@@ -11,7 +11,7 @@ var conf = JSON.parse( fs.readFileSync("config.json") );
 var connection = mysql.createConnection(conf);
 connection.connect();
 
-
+var errors = [];
 var filepaths = [];
 
 var scanDir = function ( dirpath ) {
@@ -55,6 +55,10 @@ var hashFile = function ( filepath ) {
 
 	stream.on('data', function (data) {
 	    hash.update(data, 'utf8')
+	});
+
+	stream.on('error', function (err) {
+		console.log( err );
 	});
 
 	stream.on('end', function () {
@@ -122,8 +126,11 @@ var recordInDatabase = function ( filepath, sha1, blockhash ) {
 		ext = "jpeg";
 	}
 
+	var relativepath = filepath.slice( rootpath.length );
+
 	var file  = {
-		filepath: filepath,
+		rootpath: rootpath,
+		relativepath: filepath,
 		filename: fileInfo.base,
 		ext: ext,
 		bytes: fs.statSync( filepath ).size,
@@ -132,7 +139,10 @@ var recordInDatabase = function ( filepath, sha1, blockhash ) {
 	};
 
 	var query = connection.query('INSERT INTO files SET ?', file, function(err, result) {
-		if (err) throw err;
+		if (err) {
+			console.log( err );
+			errors.push( err );
+		}
 	});
 
 	nextFile++;
@@ -147,9 +157,9 @@ var recordInDatabase = function ( filepath, sha1, blockhash ) {
 
 
 // first real argument must be a valid path
-var pathToScan = process.argv[2];
+var rootpath = process.argv[2];
 var nextFile = 0;
-if ( fs.lstatSync( pathToScan ).isDirectory() ) {
-	scanDir( pathToScan );
+if ( fs.lstatSync( rootpath ).isDirectory() ) {
+	scanDir( rootpath );
 	hashFile( filepaths[nextFile] );
 }
