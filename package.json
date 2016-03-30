@@ -12,7 +12,7 @@
   },
   "dependencies": {
     "mysql": ">2.10.1",
-    "blockhash-js": "*",
+    "blockhash": "*",
     "jpeg-js": "*",
     "png-js": "*"
   },
