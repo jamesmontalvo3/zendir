@@ -27,7 +27,6 @@ CREATE TABLE files (
   blockhash varbinary(64)
 );
 
-CREATE UNIQUE INDEX id ON files (id);
 CREATE UNIQUE INDEX path ON files (rootpath, relativepath);
 CREATE INDEX relativepath ON files (relativepath);
 CREATE INDEX extension ON files (ext);
