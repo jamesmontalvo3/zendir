@@ -104,8 +104,25 @@ http.createServer(function(request, response) {
 						}
 						else {
 							output += "<li><strong>[" + numFiles + " files, " + megabytes + "MB]</strong> "
-								+ "<a href='" + uri + "'>" + relPath + "</a></li>";
+								+ "<a href='" + uri + "'>" + relPath + "</a><ul>";
 						}
+
+						for( var j=0; j<sorted[i].files.length; j++ ) {
+							var filename = sorted[i].files[j].relativepath.slice( sorted[i].files[j].lastIndexOf('/') );
+							var fileURI = ( conf.uriPrefix + sorted[i].files[j].relativepath ).replace(/ /g, "%20");
+							if ( urlParts[2] === "wikitext" ) {
+								output += "** [" + fileURI + " " + filename + "]\n";
+							}
+							else {
+								output += "<li><a href='" + fileURI + "'>" + filename + "</a></li>";
+							}
+
+						}
+
+						if ( urlParts[2] !== "wikitext" ) {
+							output += "</ul></li>";
+						}
+
 					}
 
 					if ( urlParts[2] === "wikitext" ) {
