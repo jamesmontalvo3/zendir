@@ -83,14 +83,14 @@ http.createServer(function(request, response) {
 					sorted.sort(function(a,b) {return (a.totalBytes > b.totalBytes) ? -1 : ((b.totalBytes > a.totalBytes) ? 1 : 0);} );
 					var output = "", numFiles, megabytes, relPath, uri;
 
-					if ( urlParts[3] && parseInt( urlParts[3] ) && parseInt( urlParts[3] ) > 0 ) {
-						var lines = parseInt( urlParts[3] );
+					if ( urlParts[3] && parseInt( urlParts[3] ) && parseInt( urlParts[3] ) > 0 && parseInt( urlParts[3] ) < sorted.length ) {
+						var limit = parseInt( urlParts[3] );
 					}
 					else {
-						var lines = 100;
+						var limit = 100;
 					}
 
-					for ( var i=0; i<lines; i++ ) {
+					for ( var i=0; i<limit; i++ ) {
 						numFiles = sorted[i].files.length;
 						relPath = sorted[i].dir;
 						uri = ( conf.uriPrefix + relPath ).replace(/ /g, "%20");
@@ -149,15 +149,15 @@ http.createServer(function(request, response) {
 						return;
 					}
 
-					if ( urlParts[3] && parseInt( urlParts[3] ) && parseInt( urlParts[3] ) > 0 ) {
-						var lines = parseInt( urlParts[3] );
+					if ( urlParts[3] && parseInt( urlParts[3] ) && parseInt( urlParts[3] ) > 0 && parseInt( urlParts[3] ) < sorted.length ) {
+						var limit = parseInt( urlParts[3] );
 					}
 					else {
-						var lines = 20;
+						var limit = 20;
 					}
 
 					var output = "", megabytes;
-					for( var i=0; i<lines; i++ ) {
+					for( var i=0; i<limit; i++ ) {
 						megabytes = sorted[i].totalBytes/1000000;
 						if ( megabytes > 1 ) {
 							megabytes = megabytes.toFixed(1);
