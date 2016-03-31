@@ -164,13 +164,20 @@ http.createServer(function(request, response) {
 								output += "<li><a href='" + uri + "'>" + relPath + "</a></li>";
 							}
 						}
-						output += "</ul>";
 
 					}
 
-					response.writeHead(200, {'Content-Type': 'text/html'})
-					response.write( "<ul>" + output + "</ul>" );
-					response.end();
+					if ( urlParts[2] === "wikitext" ) {
+						response.writeHead(200, {'Content-Type': 'text/plain'})
+						response.write( output );
+						response.end();
+					}
+					else {
+						response.writeHead(200, {'Content-Type': 'text/html'})
+						response.write( "<ul>" + output + "</ul>" );
+						response.end();
+					}
+
 				}
 				else {
 					// ?
