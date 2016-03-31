@@ -90,7 +90,7 @@ http.createServer(function(request, response) {
 					fileInfo[uniqueCol] = rowUnique;
 
 					if ( ! identicals[rowUnique] ) {
-						identicals[rowUnique] = { files: [], bytes: 0 };
+						identicals[rowUnique] = { files: [], totalBytes: 0 };
 					}
 
 					identicals[rowUnique].files.push(fileInfo);
