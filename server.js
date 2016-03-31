@@ -81,7 +81,7 @@ http.createServer(function(request, response) {
 						sorted.push( dirs[d] );
 					}
 					sorted.sort(function(a,b) {return (a.totalBytes > b.totalBytes) ? -1 : ((b.totalBytes > a.totalBytes) ? 1 : 0);} );
-					var output, numFiles, megabytes, relPath;
+					var output = "", numFiles, megabytes, relPath;
 					for ( var i=0; i<100; i++ ) {
 						numFiles = sorted[i].files.length;
 						megabytes = sorted[i].totalBytes/1000000;
