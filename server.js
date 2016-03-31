@@ -4,6 +4,7 @@ var path = require('path');
 var http = require('http');
 var mysql = require('mysql');
 
+var uniqueCol;
 
 http.createServer(function(request, response) {
 	var headers = request.headers;
@@ -24,21 +25,9 @@ http.createServer(function(request, response) {
 			var connection = mysql.createConnection(conf);
 			connection.connect();
 
-			var queryFile, uniqueCol;
-
-			// rows like: {
-			// 	rootpath: rootpath,
-			// 	relativepath: relativepath,
-			// 	filename: fileInfo.base,
-			// 	ext: ext,
-			// 	bytes: fs.statSync( filepath ).size,
-			// 	sha1: sha1,
-			// 	blockhash: blockhashFile( filepath )
-			// };
-
+			var queryFile;
 
 			var urlParts = request.url.replace(/^\//, '').replace(/\/$/, '').split("/");
-
 
 			if ( urlParts[0] === "" ) {
 				response.write( "<h1></h1><ul><li><a href='sha1'>sha1</a></li><li><a href='blockhash'>blockhash</a></li></ul>" );
@@ -73,43 +62,47 @@ http.createServer(function(request, response) {
 					console.log( err );
 				}
 
-				var rowUnique, row;
+				if ( urlParts[1] === "dir" ) {
+					var dir, dirs = {};
 
-				var identicals = {};
-				for ( var i=0; i<rows.length; i++ ) {
-
-					row = rows[i];
-					rowUnique = row[uniqueCol].toString();
-
-					fileInfo = {
-						rootpath: row.rootpath,
-						relativepath: row.relativepath,
-						ext: row.ext,
-						bytes: row.bytes
-					};
-					fileInfo[uniqueCol] = rowUnique;
-
-					if ( ! identicals[rowUnique] ) {
-						identicals[rowUnique] = { files: [], totalBytes: 0 };
+					for ( var i=0; i<rows.length; i++ ) {
+						dir = row.relativepath.slice( 0, row.relativepath.lastIndexOf('/') );
+						if ( ! dirs[dir] ) {
+							dirs[dir] = { files: [], totalBytes: 0, dir: dir };
+						}
+						dirs[dir].files.push(row);
+						dirs[dir].totalBytes += row.bytes;
 					}
+					rows = null
 
-					identicals[rowUnique].files.push(fileInfo);
-					identicals[rowUnique].totalBytes += row.bytes;
-
-				}
-
-				var sorted = [];
-				for( var u in identicals ) {
-					sorted.push( identicals[u] );
-				}
-				sorted.sort(function(a,b) {return (a.totalBytes > b.totalBytes) ? -1 : ((b.totalBytes > a.totalBytes) ? 1 : 0);} );
-
-				if ( urlParts[1] === "json" ) {
-					response.writeHead(200, {'Content-Type': 'application/json'})
-					response.write( JSON.stringify( sorted ) );
+					var sorted = [];
+					for( var d in dirs ) {
+						sorted.push( dirs[d] );
+					}
+					sorted.sort(function(a,b) {return (a.totalBytes > b.totalBytes) ? -1 : ((b.totalBytes > a.totalBytes) ? 1 : 0);} );
+					var html = "<ul>";
+					for ( var i=0; i<20; i++ ) {
+						html += "<li>" + sorted[i].dir
+							+ " (" + sorted[i].files.length + " files, " + sorted[i].totalBytes/1000000 + "MB)</li>";
+					}
+					html += "</ul>";
+					response.writeHead(200, {'Content-Type': 'text/html'})
+					response.write( html );
 					response.end();
 				}
-				else {
+				else if ( urlParts[1] === "files" ) {
+
+					var identicals = getIdenticals(rows);
+					rows = null;
+					var sorted = getSortedIdenticals(identicals);
+
+					if ( urlParts[2] === "json" ) {
+						response.writeHead(200, {'Content-Type': 'application/json'})
+						response.write( JSON.stringify( sorted ) );
+						response.end();
+						return;
+					}
+
 					var html = "<ul>";
 					for( var i=0; i<10; i++ ) {
 						html += "<li>" + sorted[i].files[0][uniqueCol] + " - <strong>" + sorted[i].totalBytes + " bytes</strong><ul>";
@@ -126,6 +119,48 @@ http.createServer(function(request, response) {
 					response.write( html );
 					response.end();
 				}
+				else {
+					// ?
+				}
 			});
 		});
 }).listen(8080); // Activates this server, listening on port 8080.
+
+
+var getIdenticals = function ( rows ) {
+
+	var rowUnique;
+
+	identicals = {};
+	for ( var i=0; i<rows.length; i++ ) {
+
+		row = rows[i];
+		rowUnique = row[uniqueCol].toString();
+
+		fileInfo = {
+			rootpath: row.rootpath,
+			relativepath: row.relativepath,
+			ext: row.ext,
+			bytes: row.bytes
+		};
+		fileInfo[uniqueCol] = rowUnique;
+
+		if ( ! identicals[rowUnique] ) {
+			identicals[rowUnique] = { files: [], totalBytes: 0 };
+		}
+
+		identicals[rowUnique].files.push(fileInfo);
+		identicals[rowUnique].totalBytes += row.bytes;
+
+	}
+	return identicals;
+
+};
+
+var getSortedIdenticals = function ( identicals ) {
+	var sorted = [];
+	for( var u in identicals ) {
+		sorted.push( identicals[u] );
+	}
+	return sorted.sort(function(a,b) {return (a.totalBytes > b.totalBytes) ? -1 : ((b.totalBytes > a.totalBytes) ? 1 : 0);} );
+};
