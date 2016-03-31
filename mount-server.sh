@@ -3,41 +3,40 @@
 # Mount a server
 #
 
-if [ -f "./remote-server-config.sh" ]; then
-	source "./remote-server-config.sh"
-fi
-
+mountName=`node bashConfig.js mountName`
+remoteShare=`node bashConfig.js remoteShare`
+remoteUsername=`node bashConfig.js remoteUsername`
 
 # Ask for mount name
-while [ -z "$mount_name" ]
+while [ -z "$mountName" ]
 do
 	echo "The mount name is just a convenient identifier for the remote"
 	echo "server. It can be whatever you want, but should only include"
 	echo "alphanumeric characters (no spaces). "
 	echo "Enter name of mount and press [ENTER]: "
-	read mount_name
+	read mountName
 done
 
 # remote share name
-while [ -z "$remote_share" ]
+while [ -z "$remoteShare" ]
 do
 	echo -e "\nEnter name of your remote share drive and press [ENTER]: "
 	echo "  (Format like: //server.com/directory)"
-	read remote_share
+	read remoteShare
 done
 
-# Ask for remote_username
-while [ -z "$remote_username" ]
+# Ask for remoteUsername
+while [ -z "$remoteUsername" ]
 do
 	echo -e "\nEnter the username for the remote share and press [ENTER]: "
-	read remote_username
+	read remoteUsername
 done
 
 
 # create mount
-mkdir "/mnt/$mount_name"
-mount.cifs "$remote_share" "/mnt/$mount_name" -o "user=$remote_username"
+mkdir "/mnt/$mountName"
+mount.cifs "$remoteShare" "/mnt/$mountName" -o "user=$remoteUsername"
 
 
-echo "/mnt/$mount_name created for $remote_share"
+echo "/mnt/$mountName created for $remoteShare"
 
