@@ -86,7 +86,7 @@ http.createServer(function(request, response) {
 						numFiles = sorted[i].files.length;
 						megabytes = sorted[i].totalBytes/1000000;
 						relPath = sorted[i].dir;
-						uri = ( conf.uriPrefix + relPath ).replace(" ", "%20");
+						uri = ( conf.uriPrefix + relPath ).replace(/ /g, "%20");
 						if ( megabytes > 1 ) {
 							megabytes = megabytes.toFixed(1);
 						}
