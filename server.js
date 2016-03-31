@@ -81,21 +81,22 @@ http.createServer(function(request, response) {
 						sorted.push( dirs[d] );
 					}
 					sorted.sort(function(a,b) {return (a.totalBytes > b.totalBytes) ? -1 : ((b.totalBytes > a.totalBytes) ? 1 : 0);} );
-					var output = "", numFiles, megabytes, relPath;
+					var output = "", numFiles, megabytes, relPath, uri;
 					for ( var i=0; i<100; i++ ) {
 						numFiles = sorted[i].files.length;
 						megabytes = sorted[i].totalBytes/1000000;
 						relPath = sorted[i].dir;
+						uri = encodeURIComponent( conf.uriPrefix + relPath );
 						if ( megabytes > 1 ) {
 							megabytes = megabytes.toFixed(1);
 						}
 						if ( urlParts[2] === "wikitext" ) {
 							output += "* '''(" + numFiles + " files, " + megabytes + "MB)''' "
-								+ "[" + conf.uriPrefix + relPath + " " + relPath + "]\n";
+								+ "[" + uri + " " + relPath + "]\n";
 						}
 						else {
 							output += "<li><strong>[" + numFiles + " files, " + megabytes + "MB]</strong> "
-								+ "<a href='" + conf.uriPrefix + relPath + "'>" + relPath + "</a></li>";
+								+ "<a href='" + uri + "'>" + relPath + "</a></li>";
 						}
 					}
 
