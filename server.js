@@ -107,7 +107,7 @@ http.createServer(function(request, response) {
 								+ "<a href='" + uri + "'>" + relPath + "</a><ul>";
 						}
 
-						for( var j=0; j<sorted[i].files.length; j++ ) {
+						for( var j=0; j<sorted[i].files[j].length; j++ ) {
 							var filename = sorted[i].files[j].relativepath.slice( sorted[i].files[j].lastIndexOf('/') );
 							var fileURI = ( conf.uriPrefix + sorted[i].files[j].relativepath ).replace(/ /g, "%20");
 							if ( urlParts[2] === "wikitext" ) {
