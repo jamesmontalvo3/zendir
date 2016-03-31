@@ -81,20 +81,34 @@ http.createServer(function(request, response) {
 						sorted.push( dirs[d] );
 					}
 					sorted.sort(function(a,b) {return (a.totalBytes > b.totalBytes) ? -1 : ((b.totalBytes > a.totalBytes) ? 1 : 0);} );
-					var html = "<ul>", numFiles, megabytes;
+					var output, numFiles, megabytes, relPath;
 					for ( var i=0; i<100; i++ ) {
 						numFiles = sorted[i].files.length;
 						megabytes = sorted[i].totalBytes/1000000;
+						relPath = sorted[i].dir;
 						if ( megabytes > 1 ) {
 							megabytes = megabytes.toFixed(1);
 						}
-						html += "<li>[" + numFiles + " files, " + megabytes + "MB] "
-							+ sorted[i].dir + "</li>";
+						if ( urlParts[2] === "wikitext" ) {
+							output += "* '''(" + numFiles + " files, " + megabytes + "MB)''' "
+								+ "[" + conf.uriPrefix + relPath + " " + relPath + "]\n";
+						}
+						else {
+							output += "<li><strong>[" + numFiles + " files, " + megabytes + "MB]</strong> "
+								+ "<a href='" + conf.uriPrefix + relPath + "'>" + relPath + "</a></li>";
+						}
 					}
-					html += "</ul>";
-					response.writeHead(200, {'Content-Type': 'text/html'})
-					response.write( html );
-					response.end();
+
+					if ( urlParts[2] === "wikitext" ) {
+						response.writeHead(200, {'Content-Type': 'text/plain'})
+						response.write( output );
+						response.end();
+					}
+					else {
+						response.writeHead(200, {'Content-Type': 'text/html'})
+						response.write( "<ul>" + output + "</ul>" );
+						response.end();
+					}
 				}
 				else if ( urlParts[1] === "files" ) {
 
