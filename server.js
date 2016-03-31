@@ -148,7 +148,7 @@ http.createServer(function(request, response) {
 						uri = ( conf.uriPrefix + relPath ).replace(/ /g, "%20");
 
 						if ( urlParts[2] === "wikitext" ) {
-							output += "* '''" + megabytes + " MB'''<small> - " + sorted[i].files[0][uniqueCol] + "</small>";
+							output += "* '''" + megabytes + " MB'''<small> - " + sorted[i].files[0][uniqueCol] + "</small>\n";
 						}
 						else {
 							output += "<li><strong>" + megabytes + " MB</strong><small> - " + sorted[i].files[0][uniqueCol] + "</small><ul>";
@@ -158,7 +158,7 @@ http.createServer(function(request, response) {
 							var relPath = sorted[i].files[j].relativepath;
 
 							if ( urlParts[2] === "wikitext" ) {
-								output += "** [" + uri + " " + relPath + "]";
+								output += "** [" + uri + " " + relPath + "]\n";
 							}
 							else {
 								output += "<li><a href='" + uri + "'>" + relPath + "</a></li>";
