@@ -102,10 +102,9 @@ http.createServer(function(request, response) {
 				for( var u in identicals ) {
 					sorted.push( identicals[u] );
 				}
+				sorted.sort(function(a,b) {return (a.totalBytes > b.totalBytes) ? -1 : ((b.totalBytes > a.totalBytes) ? 1 : 0);} );
 
 				if ( urlParts[1] === "json" ) {
-					sorted.sort(function(a,b) {return (a.totalBytes > b.totalBytes) ? -1 : ((b.totalBytes > a.totalBytes) ? 1 : 0);} );
-
 					response.writeHead(200, {'Content-Type': 'application/json'})
 					response.write( JSON.stringify( sorted ) );
 					response.end();
@@ -113,7 +112,7 @@ http.createServer(function(request, response) {
 				else {
 					var html = "<ul>";
 					for( var i=0; i<10; i++ ) {
-						html += "<li>" + sorted[i].files[0][uniqueCol] + "<ul>";
+						html += "<li>" + sorted[i].files[0][uniqueCol] + " - <strong>" + sorted[i].totalBytes + " bytes</strong><ul>";
 						for ( var j=0; j<sorted[i].files.length; j++ ) {
 							var relPath = sorted[i].files[j].relativepath;
 							html += "<li><a href='" + conf.uriPrefix + relPath + "'>" + relPath + "</a></li>";
