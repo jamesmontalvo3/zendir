@@ -82,11 +82,19 @@ http.createServer(function(request, response) {
 					}
 					sorted.sort(function(a,b) {return (a.totalBytes > b.totalBytes) ? -1 : ((b.totalBytes > a.totalBytes) ? 1 : 0);} );
 					var output = "", numFiles, megabytes, relPath, uri;
-					for ( var i=0; i<100; i++ ) {
+
+					if ( urlParts[3] && parseInt( urlParts[3] ) && parseInt( urlParts[3] ) > 0 ) {
+						var lines = parseInt( urlParts[3] );
+					}
+					else {
+						var lines = 100;
+					}
+
+					for ( var i=0; i<lines; i++ ) {
 						numFiles = sorted[i].files.length;
-						megabytes = sorted[i].totalBytes/1000000;
 						relPath = sorted[i].dir;
 						uri = ( conf.uriPrefix + relPath ).replace(/ /g, "%20");
+						megabytes = sorted[i].totalBytes/1000000;
 						if ( megabytes > 1 ) {
 							megabytes = megabytes.toFixed(1);
 						}
@@ -124,20 +132,44 @@ http.createServer(function(request, response) {
 						return;
 					}
 
-					var html = "<ul>";
-					for( var i=0; i<10; i++ ) {
-						html += "<li>" + sorted[i].files[0][uniqueCol] + " - <strong>" + sorted[i].totalBytes + " bytes</strong><ul>";
+					if ( urlParts[3] && parseInt( urlParts[3] ) && parseInt( urlParts[3] ) > 0 ) {
+						var lines = parseInt( urlParts[3] );
+					}
+					else {
+						var lines = 20;
+					}
+
+					var output = "", megabytes;
+					for( var i=0; i<lines; i++ ) {
+						megabytes = sorted[i].totalBytes/1000000;
+						if ( megabytes > 1 ) {
+							megabytes = megabytes.toFixed(1);
+						}
+						uri = ( conf.uriPrefix + relPath ).replace(/ /g, "%20");
+
+						if ( urlParts[2] === "wikitext" ) {
+							output += "* '''" + megabytes + " MB'''<small> - " + sorted[i].files[0][uniqueCol] + "</small>";
+						}
+						else {
+							output += "<li><strong>" + megabytes + " MB</strong><small> - " + sorted[i].files[0][uniqueCol] + "</small><ul>";
+						}
+
 						for ( var j=0; j<sorted[i].files.length; j++ ) {
 							var relPath = sorted[i].files[j].relativepath;
-							html += "<li><a href='" + conf.uriPrefix + relPath + "'>" + relPath + "</a></li>";
+
+							if ( urlParts[2] === "wikitext" ) {
+								output += "** [" + uri + " " + relPath + "]";
+							}
+							else {
+								output += "<li><a href='" + uri + "'>" + relPath + "</a></li>";
+							}
 						}
-						html += "</ul>";
+						output += "</ul>";
 
 					}
-					html += "</ul>";
 
 					response.writeHead(200, {'Content-Type': 'text/html'})
-					response.write( html );
+					response.write( "<ul>" + output + "</ul>" );
 					response.end();
 				}
 				else {
