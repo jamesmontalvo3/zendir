@@ -35,6 +35,13 @@ http.createServer(function(request, response) {
 				response.end();
 				return;
 			}
+			else if ( urlParts[0] === "treemap" ) {
+				response.writeHead(200, {'Content-Type': 'text/html'})
+				var treemapHtml = fs.readFileSync("treemap.html");
+				response.write( treemapHtml );
+				response.end;
+				return;
+			}
 			else if ( urlParts[0] === "sha1" ) {
 				queryFile = "selectDuplicateSha1.sql";
 				uniqueCol = "sha1";
