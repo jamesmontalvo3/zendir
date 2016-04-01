@@ -3,13 +3,16 @@ var path = require('path');
 var mysql = require('mysql');
 
 var conf = JSON.parse( fs.readFileSync("config.json") );
+var connection = mysql.createConnection(conf);
+connection.connect();
 
 var errors = [];
-var filepaths = [];
 
 var scanDir = function ( dirpath ) {
 
 	try {
+
+		console.log( "SCANNING " + dirpath );
 		var files = fs.readdirSync( dirpath );
 
 		for( var i=0; i<files.length; i++) {
@@ -18,14 +21,12 @@ var scanDir = function ( dirpath ) {
 			var isFile = fs.lstatSync(filepath).isFile();
 
 			if ( isFile ) {
-				filepaths.push( filepath );
+				recordFilepath( filepath );
 			}
 			else {
 				scanDir( filepath );
 			}
 		}
-
-		console.log( "SCANNING " + dirpath );
 
 	} catch (err) {
 		console.log( "SKIPPING " + dirpath + ": " + err );
@@ -34,25 +35,7 @@ var scanDir = function ( dirpath ) {
 };
 
 
-var statFile = function ( filepath ) {
-
-	var percentComplete = ((nextFile / filepaths.length) * 100).toFixed(2);
-
-	console.log( "(" + percentComplete + "%) RECORDING: " + filepath );
-
-	fs.stat( filepath, function( err, stats ){
-		if ( err ) {
-			console.log(err);
-			errors.push(err);
-		}
-
-		recordInDatabase( filepath, stats );
-	});
-
-};
-
-
-var recordInDatabase = function ( filepath, stats ) {
+var recordFilepath = function ( filepath ) {
 
 	var fileInfo = path.parse( filepath );
 
@@ -64,32 +47,20 @@ var recordInDatabase = function ( filepath, stats ) {
 
 	var relativepath = filepath.slice( rootpath.length );
 
-	var file  = {
+	var file = {
 		rootpath: rootpath,
 		relativepath: relativepath,
 		filename: fileInfo.base,
-		ext: ext,
-		bytes: stats.size
+		ext: ext
 	};
 
-	var connection = mysql.createConnection(conf);
-	connection.connect();
-	var query = connection.query('INSERT INTO files SET ?', file, function(err, result) {
+	var query = connection.query('INSERT IGNORE INTO files SET ?', file, function(err, result) {
 		if (err) {
 			console.log( err );
 			errors.push( err );
 		}
 	});
-	connection.end();
 
-	nextFile++;
-	if ( filepaths[nextFile] ) {
-		statFile(filepaths[nextFile]);
-	}
-	else {
-		console.log( "(100%) RECORDING COMPLETE" );
-		process.exit();
-	}
 };
 
 
@@ -98,5 +69,6 @@ var rootpath = process.argv[2];
 var nextFile = 0;
 if ( fs.lstatSync( rootpath ).isDirectory() ) {
 	scanDir( rootpath );
-	statFile( filepaths[nextFile] );
+	console.log( "\nSCAN COMPLETE.\nRun `node findDuplicates.js` to compute sha1 of all files." );
+	process.exit();
 }

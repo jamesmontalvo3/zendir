@@ -13,49 +13,82 @@ connection.connect();
 var sql = "SELECT rootpath, relativepath FROM files WHERE sha1 IS NULL";
 var percentComplete, filepath, sha1sum, file;
 
+var files;
+var nextFile = 0;
+
 var query = connection.query( sql, function(err, rows, fields) {
 	if (err) {
 		console.log( err );
 	}
 
-	for ( var i=0; i<rows.length; i++ ) {
+	files = rows;
 
-		file = {
-			rootpath: rows[i].rootpath,
-			relativepath: rows[i].relativepath,
-		};
-
-		filepath = join( file.rootpath, file.relativepath );
-		percentComplete = ((i / rows.length) * 100).toFixed(2);
-		console.log( "(" + percentComplete + "%) RECORDING: " + filepath );
-
-
-		try {
-			fs.accessSync( filepath, fs.R_OK ) ); // throws error if can't read file
-			file.sha1 = child_process.execSync('sha1sum ' + filepath).toString().slice(0,40);
-			file.bytes = fs.statSync( filepath ).size;
-		}
-		catch (e) {
-			errors.push(e);
-			console.log(e);
-			file.sha1 = "file access error";
-			file.bytes = 0;
-		}
-
-		var query = connection.query(
-			'UPDATE files SET sha1 = :sha1 WHERE rootpath = :rootpath AND relativepath = :relativepath',
-			file,
-			function(err, result) {
-				if (err) {
-					console.log( err );
-					errors.push( err );
-				}
-			});
-
+	if ( files.length > 0 ) {
+		doNextFile( files[0] );
+	}
+	else {
+		console.log( "No rows returned." );
+		process.exit();
 	}
 
-	console.log( "(100%) RECORDING COMPLETE" );
 });
 
-connection.end();
-process.exit();
+var doNextFile = function () {
+
+	var file = files[nextFile];
+	nextFile++;
+
+	filepath = path.join( file.rootpath, file.relativepath );
+	percentComplete = ((nextFile / files.length) * 100).toFixed(2);
+	console.log( "(" + percentComplete + "%) RECORDING: " + filepath );
+
+	var crypto = require('crypto'),
+		hash = crypto.createHash('sha1'),
+		stream = fs.createReadStream(filepath);
+
+	stream.on('data', function (data) {
+		hash.update(data, 'utf8')
+	});
+
+	stream.on('error', function (err) {
+		console.log( err );
+		errors.push( err );
+	});
+
+	stream.on('end', function () {
+		file.sha1 = hash.digest('hex');
+		recordInDatabase( filepath, file );
+	});
+
+};
+
+var recordInDatabase = function( filepath, file ) {
+
+	//var sql = 'UPDATE files SET sha1 = :sha1 WHERE rootpath = :rootpath AND relativepath = :relativepath';
+	var sha1 = mysql.escape(file.sha1),
+		rootpath = mysql.escape(file.rootpath),
+		relativepath = mysql.escape(file.relativepath);
+	var sql = 'UPDATE files SET sha1 = '+sha1+' WHERE rootpath = '+rootpath+' AND relativepath = '+relativepath;
+
+	var query = connection.query(
+		sql,
+		file,
+		function(err, result) {
+			if (err) {
+				console.log( err );
+				errors.push( err );
+			}
+		}
+	);
+
+	if ( files[nextFile] ) {
+		doNextFile();
+	}
+	else {
+		console.log( "(100%) RECORDING COMPLETE" );
+		connection.end();
+		process.exit();
+	}
+
+};
+
