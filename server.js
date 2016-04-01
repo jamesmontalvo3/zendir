@@ -3,6 +3,7 @@ var fs = require('fs');
 var path = require('path');
 var http = require('http');
 var mysql = require('mysql');
+var tree = {};
 
 var uniqueCol;
 
@@ -199,16 +200,16 @@ http.createServer(function(request, response) {
 				}
 				else if ( urlParts[1] === "tree" ) {
 
-					var tree = {};
+					var parentDir = rows[0].rootpath.split('/').pop();
 
 					for ( var i=0; i<rows.length; i++ ) {
-						createTreeLeaf( row );
+						createTreeLeaf( rows[i] );
 					}
 
 					tree = reformatHashTable( tree );
 
 					var root = {
-						name: rows[0].rootpath,
+						name: parentDir,
 						children: tree
 					};
 
@@ -227,9 +228,9 @@ http.createServer(function(request, response) {
 
 var createTreeLeaf = function ( row ) {
 
-	var branchParts = row.relativepath.split('/');
+	var branchParts = row.relativepath.replace(/^\//,'').split('/');
 
-	var lastBranch = getBranch( branchParts.slice( 0, branchParts.length - 1 ) );
+	var lastBranch = createTreeBranch( branchParts.slice( 0, branchParts.length - 1 ) );
 	var name = branchParts[ branchParts.length - 1 ];
 
 	lastBranch[name] = {
@@ -242,14 +243,15 @@ var createTreeBranch = function ( branchParts ) {
 
 	var current = tree;
 
-	for ( for var d in branchParts ) {
-		if ( ! current[d] ) {
-			current[d] = {
-				name: d,
+	for ( var i in branchParts ) {
+		var dirName = branchParts[i];
+		if ( ! current[dirName] ) {
+			current[dirName] = {
+				name: dirName,
 				children: {}
 			};
 		}
-		current = current[d].children;
+		current = current[dirName].children;
 	}
 
 	return current;
@@ -263,7 +265,7 @@ var reformatHashTable = function ( childHashTable ) {
 		child = childHashTable[name];
 		childArray[ childArray.length ] = child;
 		if ( child.children ) {
-			child.children = reformatChildObject( child.children );
+			child.children = reformatHashTable( child.children );
 		}
 	}
 
