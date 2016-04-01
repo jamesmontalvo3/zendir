@@ -1,4 +1,5 @@
 SELECT
+	files.rootpath,
 	files.relativepath,
 	files.blockhash,
 	files.sha1,
