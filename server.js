@@ -197,12 +197,79 @@ http.createServer(function(request, response) {
 					}
 
 				}
+				else if ( urlParts[1] === "tree" ) {
+
+					var tree = {};
+
+					for ( var i=0; i<rows.length; i++ ) {
+						createTreeLeaf( row );
+					}
+
+					tree = reformatHashTable( tree );
+
+					var root = {
+						name: rows[0].rootpath,
+						children: tree
+					};
+
+					response.writeHead( 200, {'Content-Type': 'application/json'} );
+					response.write( JSON.stringify( root ) );
+					response.end();
+					return;
+
+				}
 				else {
 					// ?
 				}
 			});
 		});
 }).listen(8080); // Activates this server, listening on port 8080.
+
+var createTreeLeaf = function ( row ) {
+
+	var branchParts = row.relativepath.split('/');
+
+	var lastBranch = getBranch( branchParts.slice( 0, branchParts.length - 1 ) );
+	var name = branchParts[ branchParts.length - 1 ];
+
+	lastBranch[name] = {
+		name: name,
+		value: row.bytes
+	};
+};
+
+var createTreeBranch = function ( branchParts ) {
+
+	var current = tree;
+
+	for ( for var d in branchParts ) {
+		if ( ! current[d] ) {
+			current[d] = {
+				name: d,
+				children: {}
+			};
+		}
+		current = current[d].children;
+	}
+
+	return current;
+};
+
+var reformatHashTable = function ( childHashTable ) {
+
+	var childArray = [];
+
+	for ( var name in childHashTable ) {
+		child = childHashTable[name];
+		childArray[ childArray.length ] = child;
+		if ( child.children ) {
+			child.children = reformatChildObject( child.children );
+		}
+	}
+
+	return childArray;
+
+};
 
 
 var getIdenticals = function ( rows ) {
