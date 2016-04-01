@@ -18,9 +18,9 @@
 --
 CREATE TABLE files (
   id int unsigned NOT NULL AUTO_INCREMENT PRIMARY KEY,
-  rootpath varchar(255) binary NOT NULL default '',
-  relativepath varchar(255) binary NOT NULL default '',
-  filename varchar(255) binary NOT NULL default '',
+  rootpath varchar(255) binary NOT NULL,
+  relativepath varchar(255) binary NOT NULL,
+  filename varchar(255) binary NOT NULL,
   ext varchar(10) binary NOT NULL default '',
   bytes bigint NOT NULL default 0,
   sha1 varbinary(40),

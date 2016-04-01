@@ -2,8 +2,9 @@ var fs = require('fs');
 var path = require('path');
 var mysql = require('mysql');
 
-
 var conf = JSON.parse( fs.readFileSync("config.json") );
+var connection = mysql.createConnection(conf);
+connection.connect();
 
 var errors = [];
 
@@ -11,6 +12,7 @@ var scanDir = function ( dirpath ) {
 
 	try {
 		var files = fs.readdirSync( dirpath );
+		console.log( "SCANNING " + dirpath );
 
 		for( var i=0; i<files.length; i++) {
 
@@ -24,8 +26,6 @@ var scanDir = function ( dirpath ) {
 				scanDir( filepath );
 			}
 		}
-
-		console.log( "SCANNING " + dirpath );
 
 	} catch (err) {
 		console.log( "SKIPPING " + dirpath + ": " + err );
@@ -46,22 +46,19 @@ var recordFilepath = function ( filepath ) {
 
 	var relativepath = filepath.slice( rootpath.length );
 
-	var file  = {
+	var file = {
 		rootpath: rootpath,
 		relativepath: relativepath,
 		filename: fileInfo.base,
 		ext: ext
 	};
 
-	var connection = mysql.createConnection(conf);
-	connection.connect();
 	var query = connection.query('INSERT IGNORE INTO files SET ?', file, function(err, result) {
 		if (err) {
 			console.log( err );
 			errors.push( err );
 		}
 	});
-	connection.end();
 
 };
 
