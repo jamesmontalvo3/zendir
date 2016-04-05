@@ -53,6 +53,8 @@ var doNextFile = function () {
 	stream.on('error', function (err) {
 		console.log( err );
 		errors.push( err );
+		file.sha1 = "skipped-stream-error";
+		recordInDatabase( filepath, file );
 	});
 
 	stream.on('end', function () {
