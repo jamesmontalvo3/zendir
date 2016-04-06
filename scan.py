@@ -41,10 +41,13 @@ for dirpath, dirs, files in os.walk(rootpath):
 
 		stats = os.stat( filepath )
 
-		# FIXME: CHECK PERMISSIONS BEFORE ATTEMPTING TO READ
-		sha1 = hashlib.sha1()
-		sha1.update( file( filepath , 'rb').read() )
-		sha1 = sha1.hexdigest()
+		# Can't sha1 if you can't access the file
+		try:
+			sha1 = hashlib.sha1()
+			sha1.update( file( filepath , 'rb').read() )
+			sha1 = sha1.hexdigest()
+		except:
+			sha1 = "unable-to-generate-sha1"
 
 		created = time.strftime("%Y-%m-%d %H:%M:%S", time.gmtime(stats.st_ctime))
 		modified = time.strftime("%Y-%m-%d %H:%M:%S", time.gmtime(stats.st_mtime))
