@@ -59,10 +59,10 @@ for dirpath, dirs, files in os.walk(rootpath):
 		try:
 			cur.execute(query, (rootpath,relativepath,filename,extension,bytes,sha1,created,modified,accessed))
 		except MySQLdb.Error, e:
-		    try:
-		        print "MySQL Error [%d]: %s" % (e.args[0], e.args[1])
-		    except IndexError:
-		        print "MySQL Error: %s" % str(e)
+			try:
+				print "MySQL Error [%d]: %s" % (e.args[0], e.args[1])
+			except IndexError:
+				print "MySQL Error: %s" % str(e)
 
 
 	print "Complete with directory", dirpath
