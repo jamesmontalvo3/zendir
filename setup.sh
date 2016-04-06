@@ -35,8 +35,8 @@ service mysqld start
 #
 # Set root password. Must be specified
 #
+echo -e "\n\nSet MySQL root password"
 mysqladmin -u root password
 
-cp ./config.example.py ./config.py
 
-print "Setup complete. Edit config.py"
+echo -e "\n\nSetup complete. Copy config.example.py to config.py"

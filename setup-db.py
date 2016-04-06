@@ -55,7 +55,10 @@ CREATE TABLE files (
   ext varchar(10) binary NOT NULL default '',
   bytes bigint NOT NULL default 0,
   sha1 varbinary(40),
-  blockhash varbinary(64)
+  blockhash varbinary(64),
+  created varchar(19),
+  modified varchar(19),
+  accessed varchar(19)
 );
 
 CREATE UNIQUE INDEX path ON files (rootpath, relativepath);
