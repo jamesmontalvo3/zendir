@@ -15,10 +15,10 @@ cur = db.cursor()
 rootpath = config.directoryToAnalyze
 print "Performing analysis on ", rootpath
 
-for fullpath, dirs, files in os.walk(rootpath):
+for dirpath, dirs, files in os.walk(rootpath):
 	for filename in files:
 
-		filepath = join(fullpath, filename)
+		filepath = join(dirpath, filename)
 
 		# get the file extension
 		# use os.path.splitext() to split the filename on the last period
@@ -35,11 +35,11 @@ for fullpath, dirs, files in os.walk(rootpath):
 		# path to files with top level removed
 		# this will make it easier to translate between S-drive files being
 		# analyzed on a computer other than JSC-MOD-FS3
-		relativepath = fullpath[len(rootpath):]
+		relativepath = filepath[len(rootpath):]
 
 		stats = os.stat( filepath )
 
-		# CHECK PERMISSIONS BEFORE ATTEMPTING TO READ
+		# FIXME: CHECK PERMISSIONS BEFORE ATTEMPTING TO READ
 		sha1 = hashlib.sha1()
 		sha1.update( file( filepath , 'rb').read() )
 		sha1 = sha1.hexdigest()
@@ -57,7 +57,7 @@ for fullpath, dirs, files in os.walk(rootpath):
 		cur.execute(query,
 			(rootpath,relativepath,filename,extension,bytes,sha1,created,modified,accessed))
 
-	print "Complete with directory", fullpath
+	print "Complete with directory", dirpath
 
 
 # Close communication with the database

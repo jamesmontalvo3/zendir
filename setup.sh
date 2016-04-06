@@ -19,10 +19,12 @@ fi
 
 #
 # Install Python, MySQL server, and Python connector
+# Also cifs-utils for mounting servers
 #
 yum -y install \
 	mysql-community-server \
-	MySQL-python
+	MySQL-python \
+	cifs-utils
 
 
 #
