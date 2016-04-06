@@ -1,12 +1,14 @@
 #!/usr/bin/env python
 
-import os, time, psycopg2, hashlib
+import os, time, MySQLdb, hashlib
 from os.path import join, getsize
 import config
 
-conn = psycopg2.connect("dbname=%(dbname)s user=%(username)s password=%(password)s" \
-	% config.database)
-cur = conn.cursor()
+db = MySQLdb.connect(host=config.database["host"],
+					user=config.database["user"],
+					passwd=config.database["passwd"],
+					db=config.database["db"])
+cur = db.cursor()
 
 # top level directory to search (have to escape backslashes, f-u Windows)
 # WAS: root = 'C:\\jamesbatch\\sdrive\\ConsoleLogBackup'
@@ -24,6 +26,9 @@ for fullpath, dirs, files in os.walk(root):
 		# returned string will have the period on the front; strip it with [1:]
 		# make it all lowercase
 		ext = os.path.splitext(name)[1][1:].lower()
+
+		if ext == "jpg":
+			ext = "jpeg"
 
 		size = getsize( filepath ) # size of this file
 
@@ -53,11 +58,8 @@ for fullpath, dirs, files in os.walk(root):
 
 	print "Complete with directory", fullpath
 
-# Make the changes to the database persistent
-conn.commit()
 
 # Close communication with the database
 cur.close()
-conn.close()
 
 print "complete"

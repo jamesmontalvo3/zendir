@@ -1,7 +1,6 @@
 #!/usr/bin/env python
-#!/usr/bin/python
 #
-# setup
+# Setup database. Re-running this will wipe out your database!
 
 import MySQLdb
 import config

@@ -1,31 +1,18 @@
-desdrive
-========
+dir-analyzer
+============
 
-Install
--------
+This is designed to analyze files and directories. The main purpose is to
+identify duplicate files and replace them with shortcuts (though replacement
+feature is not developed yet).
 
-```bash
-git clone https://github.com/jamesmontalvo3/desdrive
-cd desdrive
-npm install
-cp config.example.json config.json
-vi config.json # edit this accordingly
-node setup.js
-```
+Additionally, it will find near-duplicate images using pHash or blockhash
+libraries, and perhaps use other methods to find near-duplicate files.
 
-Use it
-------
+## Setup
 
-Optionally mount another server:
+On RHEL-like operating systems:
 
-```bash
-sudo bash mount-server.sh
-```
-
-Then tell desdrive to analyze everything within a certain path:
-
-```bash
-node run.js /path/to/directory/to/analyze
-```
-
-For now the only way to consume the data generated is via direct SQL queries. Sorry.
+1. Run `sudo bash setup.sh`
+2. Edit `config.py` with your setup
+3. Run `python setup-db.py`
+4. Run `python scan.py`

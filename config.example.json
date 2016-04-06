@@ -1,9 +1,0 @@
-{
-	"host"     : "localhost",
-	"user"     : "root",
-	"password" : "password",
-	"database" : "desdrive",
-	"uriPrefix" : "file://my.server.com/path/to/share",
-	"mountName" : "mydrive",
-	"remoteShare" : "//servername/directory"
-}
