@@ -63,7 +63,7 @@ CREATE TABLE files (
 
 CREATE UNIQUE INDEX path ON files (rootpath, relativepath);
 CREATE INDEX relativepath ON files (relativepath);
-CREATE INDEX extension ON files (ext);
+CREATE INDEX extension ON files (extension);
 CREATE INDEX sha1 ON files (sha1);
 CREATE INDEX blockhash ON files (blockhash);
 """)
