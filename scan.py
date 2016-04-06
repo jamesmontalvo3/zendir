@@ -39,6 +39,7 @@ for fullpath, dirs, files in os.walk(rootpath):
 
 		stats = os.stat( filepath )
 
+		# CHECK PERMISSIONS BEFORE ATTEMPTING TO READ
 		sha1 = hashlib.sha1()
 		sha1.update( file( filepath , 'rb').read() )
 		sha1 = sha1.hexdigest()
