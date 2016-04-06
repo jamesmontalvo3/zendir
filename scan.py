@@ -20,7 +20,7 @@ for dirpath, dirs, files in os.walk(rootpath):
 
 		filepath = join(dirpath, filename)
 
-		print "Scanning %(filepath)s"
+		print "Scanning %s" % filepath
 
 		# get the file extension
 		# use os.path.splitext() to split the filename on the last period
@@ -58,6 +58,7 @@ for dirpath, dirs, files in os.walk(rootpath):
 
 		try:
 			cur.execute(query, (rootpath,relativepath,filename,extension,bytes,sha1,created,modified,accessed))
+			db.commit()
 		except MySQLdb.Error, e:
 			try:
 				print "MySQL Error [%d]: %s" % (e.args[0], e.args[1])
