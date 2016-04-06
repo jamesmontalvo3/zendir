@@ -20,6 +20,8 @@ for dirpath, dirs, files in os.walk(rootpath):
 
 		filepath = join(dirpath, filename)
 
+		print "Scanning %(filepath)s"
+
 		# get the file extension
 		# use os.path.splitext() to split the filename on the last period
 		# returns an array of two items; take the second by doing [1]
@@ -54,8 +56,14 @@ for dirpath, dirs, files in os.walk(rootpath):
 			VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s)
 			"""
 
-		cur.execute(query,
-			(rootpath,relativepath,filename,extension,bytes,sha1,created,modified,accessed))
+		try:
+			cur.execute(query, (rootpath,relativepath,filename,extension,bytes,sha1,created,modified,accessed))
+		except MySQLdb.Error, e:
+		    try:
+		        print "MySQL Error [%d]: %s" % (e.args[0], e.args[1])
+		    except IndexError:
+		        print "MySQL Error: %s" % str(e)
+
 
 	print "Complete with directory", dirpath
 
