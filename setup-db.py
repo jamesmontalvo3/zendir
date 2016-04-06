@@ -52,7 +52,7 @@ CREATE TABLE files (
   rootpath varchar(255) binary NOT NULL,
   relativepath varchar(255) binary NOT NULL,
   filename varchar(255) binary NOT NULL,
-  ext varchar(10) binary NOT NULL default '',
+  extension varchar(10) binary NOT NULL default '',
   bytes bigint NOT NULL default 0,
   sha1 varbinary(40),
   blockhash varbinary(64),
@@ -67,7 +67,5 @@ CREATE INDEX extension ON files (ext);
 CREATE INDEX sha1 ON files (sha1);
 CREATE INDEX blockhash ON files (blockhash);
 """)
-
-db.close()
 
 print "Database setup complete"

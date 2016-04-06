@@ -49,8 +49,8 @@ for fullpath, dirs, files in os.walk(root):
 
 		query = """
 			INSERT INTO files
-			(filename,extension,bytes,root,relativepath,sha1,created,modified,accessed)
-			VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s)
+			(rootpath,relativepath,filename,extension,bytes,sha1,blockhash,created,modified,accessed)
+			VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
 			"""
 
 		cur.execute(query,
