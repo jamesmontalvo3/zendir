@@ -58,7 +58,8 @@ CREATE TABLE files (
   blockhash varbinary(64),
   created varchar(19),
   modified varchar(19),
-  accessed varchar(19)
+  accessed varchar(19),
+  is_dupe tinyint
 );
 
 CREATE UNIQUE INDEX path ON files (rootpath, relativepath);
@@ -66,6 +67,7 @@ CREATE INDEX relativepath ON files (relativepath);
 CREATE INDEX extension ON files (extension);
 CREATE INDEX sha1 ON files (sha1);
 CREATE INDEX blockhash ON files (blockhash);
+CREATE INDEX is_dupe ON files (is_dupe);
 """)
 
 print "Database setup complete"
