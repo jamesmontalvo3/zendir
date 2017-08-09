@@ -72,7 +72,125 @@ for dirpath, dirs, files in os.walk(rootpath):
 	print "Complete with directory", dirpath
 
 
+# Close communication with the database. May be required prior to next part
+cur.close()
+
+
+#
+# This needs to be done after the files have been scanned
+#
+print "generating directories..."
+cur = db.cursor() # make a new one...
+
+cur.execute("""
+SELECT relativepath FROM files
+""")
+
+rows = cur.fetchall()
+
+dirs = {}
+
+for row in rows:
+  dir = row[0][0:row[0].rfind('/')]
+  if dir in dirs:
+    dirs[dir] += 1
+  else:
+    print "NEW directory: {0}".format(dir)
+    dirs[dir] = 1
+
+print "\nCOMPLETE SCAN, START INSERT\n"
+
+for dir in dirs:
+  print "INSERTING dir: {0}".format(dir)
+  try:
+    cur.execute( "INSERT INTO directories (path) VALUES (%s)", (dir) )
+    db.commit()
+  except MySQLdb.Error, e:
+    try:
+      print "MySQL Error [%d]: %s" % (e.args[0], e.args[1])
+    except IndexError:
+      print "MySQL Error: %s" % str(e)
+
+
 # Close communication with the database
 cur.close()
 
-print "complete"
+print "complete generating directory listings"
+
+
+
+#
+# Mark duplicates
+#
+cur = db.cursor() #generate a new one, just in case
+
+print "Populate is_dupe column"
+
+# mark all files as not duplicate
+cur.execute("UPDATE files SET is_dupe=0")
+
+# find the actual duplicates
+cur.execute("""
+SELECT
+	sha1,
+	COUNT(*) AS num_duplicates
+FROM files
+WHERE
+	sha1 != ""
+	AND sha1 IS NOT NULL
+	AND bytes != 0
+GROUP BY sha1
+HAVING num_duplicates > 1
+ORDER BY num_duplicates DESC
+""")
+
+rows = cur.fetchall()
+
+numrows = len(rows)
+for i, row in enumerate(rows):
+	print "{0} of {1} Setting {2} as duplicate".format(i+1, numrows, row[0])
+	try:
+		cur.execute( "UPDATE files SET is_dupe=1 WHERE sha1=%s", (row[0]) )
+		db.commit()
+	except MySQLdb.Error, e:
+		try:
+			print "MySQL Error [%d]: %s" % (e.args[0], e.args[1])
+		except IndexError:
+			print "MySQL Error: %s" % str(e)
+
+
+# Close communication with the database
+cur.close()
+
+print "Complete marking duplicates"
+
+
+#
+# Mark directory duplicates
+#
+print "Mark directory info (duplicates? quantities?)"
+cur = db.cursor() #again, just to be sure, recreate
+
+cur.execute("SELECT path FROM directories")
+
+dirs = cur.fetchall()
+numDirs = len(dirs)
+
+for i,dir in enumerate(dirs):
+	dirpath = dir[0]
+	print "{0} of {1} RECORDING {2}".format(i, numDirs, dirpath)
+	cur.execute("""
+			SELECT
+				COUNT(*), SUM(is_dupe), SUM(bytes), SUM( IF(is_dupe,bytes,0) )
+			FROM files
+			WHERE
+				relativepath LIKE "{0}%"
+		""".format( db.escape_string(dirpath) ) )
+
+	numFiles = cur.fetchone()
+
+	cur.execute( "UPDATE directories SET num_files=%s, num_dupes=%s, total_bytes=%s, dupe_bytes=%s WHERE path=%s",
+			(numFiles[0], numFiles[1], numFiles[2], numFiles[3], dirpath) )
+	db.commit()
+
+print "File quantities per directory are populated"

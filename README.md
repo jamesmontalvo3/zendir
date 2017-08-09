@@ -12,27 +12,24 @@ libraries, and perhaps use other methods to find near-duplicate files.
 
 ## Setup
 
-On RHEL-like operating systems:
+### On RHEL-like operating systems
 
 1. Run `sudo bash setup.sh`
 2. Edit `config.py` with your setup
 3. Run `python setup-db.py`
-4. Run `python scan.py`
+4. If you need to mount a drive to scan, run `bash mount-server.sh`
+5. Run `python scan.py`
 
-## Get more
+### With vagrant
 
-This is in the process of being developed, and the sample data I took (which takes hours to get) did not include some important directory information. To glue that info on, do the following:
-
-1. In mysql run `ALTER TABLE files ADD INDEX is_dupe (`is_dupe`);`
-2. Run the following python scripts to setup the `directories` table and find duplicates
-
-```bash
-python buildDirs.py
-python markDupes.py
-python markDirDupes.py
-```
-
-Soon hopefully these will all be rolled into the main script.
+1. Install Git, VirtualBox and Vagrant
+2. `git clone https://github.com/jamesmontalvo3/zendir.git`
+3. `cd zendir`
+4. `cp config.example.py config.py`
+5. Edit `config.py` to your liking
+6. `vagrant up`
+7. SSH into the box with `vagrant ssh`
+8. Run the scan: `python /vagrant/scan.py`. This could take a *long* time.
 
 ## The API sucks (or doesn't exist), so here's some SQL
 

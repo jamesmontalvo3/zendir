@@ -70,4 +70,35 @@ CREATE INDEX blockhash ON files (blockhash);
 CREATE INDEX is_dupe ON files (is_dupe);
 """)
 
+
+#
+# Below previously in buildDirs.py
+#
+import os, time
+from os.path import join, getsize
+
+
+print "Create `directories` table..."
+
+cur.execute("DROP TABLE IF EXISTS directories")
+db.commit()
+
+cur.execute("""
+CREATE TABLE directories (
+  id int unsigned NOT NULL AUTO_INCREMENT PRIMARY KEY,
+  path varchar(255) binary NOT NULL,
+  num_files INT UNSIGNED,
+  num_dupes INT UNSIGNED,
+  total_bytes BIGINT UNSIGNED,
+  dupe_bytes BIGINT UNSIGNED,
+  last_scan varbinary(14)
+);
+
+CREATE UNIQUE INDEX path ON directories (path);
+""")
+
+# Close communication with the database
+cur.close()
+
+
 print "Database setup complete"
