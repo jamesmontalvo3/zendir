@@ -12,6 +12,7 @@ db = MySQLdb.connect(host=config.database["host"],
 cur = db.cursor()
 
 # Drop database, create database, use database
+print "Drop database, recreate, use..."
 cur.execute("DROP DATABASE IF EXISTS %(db)s" % config.database)
 cur.execute("CREATE DATABASE %(db)s" % config.database)
 cur.execute("USE %(db)s" % config.database)
@@ -46,6 +47,7 @@ cur.execute("USE %(db)s" % config.database)
 
 
 # create table files
+print "Create `files` table..."
 cur.execute("""
 CREATE TABLE files (
   id int unsigned NOT NULL AUTO_INCREMENT PRIMARY KEY,
@@ -79,9 +81,7 @@ from os.path import join, getsize
 
 
 print "Create `directories` table..."
-
-cur.execute("DROP TABLE IF EXISTS directories")
-db.commit()
+cur = db.cursor()
 
 cur.execute("""
 CREATE TABLE directories (

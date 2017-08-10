@@ -1,0 +1,20 @@
+---
+
+- hosts: localhost
+  become: yes
+  vars:
+    mysql_root_password: password
+  roles:
+    - { role: geerlingguy.mysql }
+
+- hosts: localhost
+  become: yes
+  tasks:
+
+    - name: Ensure other packages in place
+      yum:
+        name: "{{ item }}"
+        state: installed
+      with_items:
+        - "MySQL-python"
+        - "cifs-utils"

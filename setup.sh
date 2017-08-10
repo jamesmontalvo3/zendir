@@ -34,11 +34,16 @@ chkconfig mysqld on
 service mysqld start
 
 
+# Get the password
+# This is hackish, since config.py doesn't necessarily specify that user is root
+password=`python bashConfig.py password`
+
+
 #
 # Set root password. Must be specified
 #
 echo -e "\n\nSet MySQL root password"
-mysqladmin -u root password
+mysqladmin -u root password "$password"
 
 
-echo -e "\n\nSetup complete. Copy config.example.py to config.py"
+echo -e "\n\nSetup complete"

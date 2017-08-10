@@ -58,9 +58,12 @@ for dirpath, dirs, files in os.walk(rootpath):
 			(rootpath,relativepath,filename,extension,bytes,sha1,created,modified,accessed)
 			VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s)
 			"""
+		field_inserts = (rootpath,relativepath,filename,extension,bytes,sha1,created,modified,accessed)
+
+		print query % field_inserts
 
 		try:
-			cur.execute(query, (rootpath,relativepath,filename,extension,bytes,sha1,created,modified,accessed))
+			cur.execute(query, field_inserts)
 			db.commit()
 		except MySQLdb.Error, e:
 			try:
@@ -91,25 +94,33 @@ rows = cur.fetchall()
 dirs = {}
 
 for row in rows:
-  dir = row[0][0:row[0].rfind('/')]
-  if dir in dirs:
-    dirs[dir] += 1
-  else:
-    print "NEW directory: {0}".format(dir)
-    dirs[dir] = 1
+	dir = row[0][0:row[0].rfind('/')]
+	if dir in dirs:
+		dirs[dir] += 1
+	else:
+		print "NEW directory: {0}".format(dir)
+		dirs[dir] = 1
 
 print "\nCOMPLETE SCAN, START INSERT\n"
 
 for dir in dirs:
-  print "INSERTING dir: {0}".format(dir)
-  try:
-    cur.execute( "INSERT INTO directories (path) VALUES (%s)", (dir) )
-    db.commit()
-  except MySQLdb.Error, e:
-    try:
-      print "MySQL Error [%d]: %s" % (e.args[0], e.args[1])
-    except IndexError:
-      print "MySQL Error: %s" % str(e)
+	if dir == "":
+		dir = "<root>"
+	# else:
+	# 	dir = MySQLdb.escape_string(dir)
+	print dir
+	print "INSERTING dir: {0}".format(dir)
+	try:
+		# query = "INSERT INTO directories (path) VALUES ({0})".format(dir)
+		# print query
+		cur.execute( "INSERT INTO directories (path) VALUES ( %(dir)s )", { 'dir': dir } )
+		# cur.execute( query )
+		db.commit()
+	except MySQLdb.Error, e:
+		try:
+			print "MySQL Error [%d]: %s" % (e.args[0], e.args[1])
+		except IndexError:
+			print "MySQL Error: %s" % str(e)
 
 
 # Close communication with the database
@@ -150,7 +161,7 @@ numrows = len(rows)
 for i, row in enumerate(rows):
 	print "{0} of {1} Setting {2} as duplicate".format(i+1, numrows, row[0])
 	try:
-		cur.execute( "UPDATE files SET is_dupe=1 WHERE sha1=%s", (row[0]) )
+		cur.execute( "UPDATE files SET is_dupe=1 WHERE sha1=%(sha1)s", { 'sha1': row[0] } )
 		db.commit()
 	except MySQLdb.Error, e:
 		try:
