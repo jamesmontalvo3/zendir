@@ -12,7 +12,7 @@ libraries, and perhaps use other methods to find near-duplicate files.
 
 ## Setup
 
-### On RHEL-like operating systems
+### On an existing RHEL-like operating systems
 
 1. Run `sudo bash setup.sh`
 2. Edit `config.py` with your setup
@@ -29,7 +29,9 @@ libraries, and perhaps use other methods to find near-duplicate files.
 5. Edit `config.py` to your liking
 6. `vagrant up`
 7. SSH into the box with `vagrant ssh`
-8. Run the scan: `python /vagrant/scan.py`. This could take a *long* time.
+8. `cd /vagrant`
+9. Optionally run `sudo bash mount-server.sh` to mount a server and enter password
+10. Run the scan: `sudo python scan.py`. This could take a *long* time.
 
 ## The API sucks (or doesn't exist), so here's some SQL
 
