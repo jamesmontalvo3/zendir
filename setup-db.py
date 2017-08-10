@@ -12,6 +12,7 @@ db = MySQLdb.connect(host=config.database["host"],
 cur = db.cursor()
 
 # Drop database, create database, use database
+print "Drop database, recreate, use..."
 cur.execute("DROP DATABASE IF EXISTS %(db)s" % config.database)
 cur.execute("CREATE DATABASE %(db)s" % config.database)
 cur.execute("USE %(db)s" % config.database)
@@ -46,6 +47,7 @@ cur.execute("USE %(db)s" % config.database)
 
 
 # create table files
+print "Create `files` table..."
 cur.execute("""
 CREATE TABLE files (
   id int unsigned NOT NULL AUTO_INCREMENT PRIMARY KEY,
@@ -69,5 +71,34 @@ CREATE INDEX sha1 ON files (sha1);
 CREATE INDEX blockhash ON files (blockhash);
 CREATE INDEX is_dupe ON files (is_dupe);
 """)
+
+
+#
+# Below previously in buildDirs.py
+#
+import os, time
+from os.path import join, getsize
+
+
+print "Create `directories` table..."
+cur = db.cursor()
+
+cur.execute("""
+CREATE TABLE directories (
+  id int unsigned NOT NULL AUTO_INCREMENT PRIMARY KEY,
+  path varchar(255) binary NOT NULL,
+  num_files INT UNSIGNED,
+  num_dupes INT UNSIGNED,
+  total_bytes BIGINT UNSIGNED,
+  dupe_bytes BIGINT UNSIGNED,
+  last_scan varbinary(14)
+);
+
+CREATE UNIQUE INDEX path ON directories (path);
+""")
+
+# Close communication with the database
+cur.close()
+
 
 print "Database setup complete"
