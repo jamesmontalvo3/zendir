@@ -32,7 +32,15 @@ for dirpath, dirs, files in os.walk(rootpath):
 		if extension == "jpg":
 			extension = "jpeg"
 
-		bytes = getsize( filepath ) # size of this file
+		try:
+			bytes = getsize( filepath ) # size of this file
+		except:
+			bytes = 0
+			# FIXME: This exception handling was added due to the error:
+			# "OSError: [Errno 11] Resource temporarily unavailable"
+			# Perhaps have some handling for that, or consider adding a flag
+			# to the line in the database for this items saying "err: bytes"
+			# or something like that.
 
 		# path to files with top level removed
 		# this will make it easier to translate between S-drive files being

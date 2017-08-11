@@ -18,9 +18,6 @@ Vagrant.configure("2") do |config|
       v.customize ["modifyvm", :id, "--name", "app1"]
     end
 
-    # app1.vm.synced_folder ".", "/vagrant", disabled: true
-    app1.vm.synced_folder "../s1p1", "/mnt/s1p1", type: "virtualbox"
-
     #
     # Bootstrap meza on the controlling VM
     #

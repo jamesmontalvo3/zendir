@@ -1,26 +1,13 @@
 ZenDir
 ======
 
-**This is under development and may be broken at any time.**
+Find duplicate files. Find directories with many duplicate files. And at some point perhaps this repo will actually delete duplicates and replace with shortcuts/symlinks.
 
-This is designed to analyze files and directories. The main purpose is to
-identify duplicate files and replace them with shortcuts (though replacement
-feature is not developed yet).
-
-Additionally, it will find near-duplicate images using pHash or blockhash
-libraries, and perhaps use other methods to find near-duplicate files.
+Additionally, it may at some point find near-duplicate images using pHash or blockhash libraries, and perhaps use other methods to find near-duplicate files.
 
 ## Setup
 
-### On an existing RHEL-like operating systems
-
-1. Run `sudo bash setup.sh`
-2. Edit `config.py` with your setup
-3. Run `python setup-db.py`
-4. If you need to mount a drive to scan, run `bash mount-server.sh`
-5. Run `python scan.py`
-
-### With vagrant
+### With vagrant (recommended)
 
 1. Install Git, VirtualBox and Vagrant
 2. `git clone https://github.com/jamesmontalvo3/zendir.git`
@@ -33,9 +20,17 @@ libraries, and perhaps use other methods to find near-duplicate files.
 9. Optionally run `sudo bash mount-server.sh` to mount a server and enter password
 10. Run the scan: `sudo python scan.py`. This could take a *long* time.
 
+### On an existing RHEL-like operating systems
+
+1. Run `sudo bash setup.sh`
+2. Edit `config.py` with your setup
+3. Run `python setup-db.py`
+4. If you need to mount a drive to scan, run `bash mount-server.sh`
+5. Run `python scan.py`
+
 ## The API sucks (or doesn't exist), so here's some SQL
 
-I started writing this in node.js, but it was not playing nice. I wrote a functional-but-ugly API in that (see another branch of this repo), but haven't yet ported it over to Python. For now I'll just drop useful SQL queries below.
+I started writing this in node.js, but it was not playing nice. I wrote a functional-but-ugly API in that (see another branch of this repo), but haven't yet ported it over to Python. For now I'll just drop useful SQL queries below. If you setup with Vagrant then you can login to your VM with `vagrant up` and access the database as root with `sudo mysql` (no password entry required). Then try the following SQL commands.
 
 ```sql
 /** Worst offending directories **/
