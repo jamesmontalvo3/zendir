@@ -3,25 +3,25 @@
 
 Vagrant.configure("2") do |config|
 
-  config.vm.define "app1", primary: true do |app1|
+  config.vm.define "zendirVM", primary: true do |zendirVM|
 
-    app1.vm.box = "bento/centos-7.3"
-    app1.vm.hostname = 'app1'
+    zendirVM.vm.box = "bento/centos-7.4"
+    zendirVM.vm.hostname = 'zendirVM'
 
-    app1.vm.network :private_network, ip: "192.168.56.56"
+    zendirVM.vm.network :private_network, ip: "192.168.56.56"
 
-    app1.vm.provider :virtualbox do |v|
+    zendirVM.vm.provider :virtualbox do |v|
       v.customize ["modifyvm", :id, "--natdnshostresolver1", "on"]
       v.customize ['modifyvm', :id, '--cableconnected1', 'on']
       v.customize ["modifyvm", :id, "--memory", 4096 ]
       v.customize ["modifyvm", :id, "--cpus", 2 ]
-      v.customize ["modifyvm", :id, "--name", "app1"]
+      v.customize ["modifyvm", :id, "--name", "zendirVM"]
     end
 
     #
     # Bootstrap meza on the controlling VM
     #
-    app1.vm.provision "getmeza", type: "shell", preserve_order: true, inline: <<-SHELL
+    zendirVM.vm.provision "getmeza", type: "shell", preserve_order: true, inline: <<-SHELL
 
       echo "Yum installs"
       yum install -y epel-release
